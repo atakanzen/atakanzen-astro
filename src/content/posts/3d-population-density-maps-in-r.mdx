@@ -1,0 +1,279 @@
+---
+title: "3D Population Density Maps in R: Visualizing Data with Raytracing"
+publishedAt: "2024-08-25T22:00:00.000Z"
+status: "published"
+author:
+  name: "Atakan"
+  picture: "https://avatars.githubusercontent.com/u/59116264?v=4"
+slug: "3d-population-density-maps-in-r"
+excerpt: "How to use RStudio to create aesthetic 3D renders for population density maps."
+---
+
+![](/images/final-plot-QyNj.webp)
+
+## Introduction
+
+By looking at the render above, you might notice two things: it’s a density map, and it strongly resembles Poland. Well, you’re absolutely right. This is indeed a density map of data related to Poland. After living here for three years, my first guess about this map would be that it shows the number of Żabka stores across the country. However, that’s not the case.
+
+What you’re actually seeing is a population density map of Poland. So, my guess about Żabka stores wasn’t entirely off—I swear there’s one for every person! But let’s set aside the lifesaving convenience stores for Sundays and focus on this map.
+
+This map was generated using 3D shader and rendering packages in R, along with additional packages to enhance its appearance. So, let’s dive in and explore how it was created.
+
+## Data Source and Format
+
+First, we need the actual population data for Poland. Fortunately, we can access this data from Kontur in `gpkg` format, which is ideal for use with the `st_read` function from the `sf` library. According to the official R documentation, `st_read` function:
+
+> Reads simple features from a file or database, or retrieves layer names and their geometry type(s).
+
+And for those who don’t know about `gpkg` , it’s a special type of SQLite database file which holds two categories of tables: user-defined and metadata. This unique structure offers a compact format for storing geospatial information.
+
+To read the data, you’ll need to download the corresponding `gpkg` file from [this dataset](https://data.humdata.org/dataset/kontur-population-dataset) provided by Kontur. You can also filter the dataset files by country on this platform.
+
+As additional information, Kontur prepares its population data using H3 hexagons with population counts at a 400m resolution. As they explain in more detail [in this blog post](https://www.kontur.io/blog/why-we-use-h3/), the key reason for using hexagons is that they have equal distances between the center of a hexagon and the centers of neighboring cells. This property greatly simplifies analysis and smoothing over gradients.
+
+> [!tip]
+>
+> You can find even more information about the Kontur Population Dataset itself [in this article](https://www.kontur.io/portfolio/population-dataset/).
+
+## Plotting the data
+
+Alright, we have the data in hand, but how do we actually plot something visible in RStudio? This is where the `ggplot` and `geom_sf` functions come into play! Let’s see how we can make use of them.
+
+```r
+# Load the GPKG data.
+poland <- st_read("data/kontur_population_PL_20220630.gpkg")
+
+# Plot the data.
+poland |>
+  ggplot() +
+  geom_sf()
+```
+
+In this code, the `poland |> ggplot()` statement initializes a `ggplot` object with the `poland` dataset as its data source. We then pipe this object into the `geom_sf()` call, which adds a layer to the plot that automatically handles spatial features such as polygons, lines, or points.
+
+Essentially, it plots the geometries stored in the `poland` object by drawing the boundaries of regions, points, or other geospatial features present in the data. These function calls will yield a plot that looks like this:
+
+![](/images/r-plot-Q1MD.webp)
+
+As you can see, the latitude and longitude are also handled and displayed on the axes. However, we’re still far from the first image I showed you at the beginning of this article. How do we make this plot 3D, reactive to light rays, and capable of forming shadows? Let’s explore that in the next section.
+
+## Rayrender and Rayshader Packages
+
+To bring some realism to our plot, we’ll be using the [rayrender](https://www.rayrender.net/) and [rayshader](https://www.rayshader.com/) packages.
+
+**Rayrender** provides an API in R that allows us to use a raytracer built in C++ to render scenes. It supports various materials, including diffuse, metallic, dielectric (glass), light-emitting, as well as procedural and user-specified image textures and HDR environment lighting.
+
+**Rayshader** is an open-source package that enables the creation of 2D and 3D data visualizations. It utilizes elevation data and a combination of raytracing to generate stunning maps, which can be rotated and examined interactively. You can even achieve high-quality renders by using specific functions from rayshader that internally leverage rayrender.
+
+While our code will primarily use the rayshader package and its API, I wanted to mention rayrender because rayshader's high-quality rendering capabilities depend on rayrender's API.
+
+**Rayshader** accepts elevation data as a base R matrix, which means we need to process our geospatial data into a format that rayshader can work with.
+
+To achieve this, we first need to convert our geometric data into a grid of cells where each cell represents an attribute of the vector data (in this case, the population density of a specific region). This process, known as rasterization, is accomplished using the `st_rasterize()` function from the `stars` package. We then create a matrix from this raster object using the built-in `matrix()` function, as shown below:
+
+```r
+# Variable to define the size of the raster.
+size <- 2000
+
+# Creating the raster with pre-calculated variables w_ratio and h_ratio
+poland_rast <- st_rasterize(poland,
+                            nx = floor(size * w_ratio),
+                            ny = floor(size * h_ratio))
+
+# Creating the matrix using the population attribute of the raster,
+# which was transferred from the original GPKG dataset
+mat <- matrix(poland_rast$population,
+              nrow = floor(size * w_ratio),
+              ncol = floor(size * h_ratio))
+```
+
+As mentioned in the code comments, `w_ratio` and `h_ratio` are calculated earlier in the code by checking the distance between the bottom-left, bottom-right, and top-left points of the map.
+
+Before diving into 3D rendering with rayshader, I want to briefly discuss the hardware requirements for rendering.
+
+As you might know, 3D computation can be resource-intensive for your computer. Having a decent CPU or GPU can significantly improve your experience with 3D computations. However, don’t worry if your hardware isn’t top-of-the-line—you can still work with 3D CGI processes, but you might need to be patient with longer render times.
+
+Rayshader uses the `rgl` package in the background, which may or may not utilize your GPU for rendering operations. On the other hand, rayrender relies solely on your CPU. So, if you have a good GPU but are still surprised by the render times, this could be why.
+
+Now that we have the matrix ready, we can start using rayshader functions to create some good looking 3D map renders!
+
+## Bringing Shadows into Data
+
+In my opinion, shadows and light are the most important elements in aesthetics. That’s why I love taking evening walks in the park near my house, watching the shadows cast by streetlights through the branches of trees. The same principle applies to 3D CGI and other forms of art. So, let’s explore how we can bring shadows and lights into our plot.
+
+First, we need colors that will complement our work with light and shadow. For this, we’ll use the `MetBrewer` package, which provides color palettes inspired by works from the [Metropolitan Museum of Art in New York City](https://www.metmuseum.org/). For this plot, I’ve chosen the “Greek” palette.
+
+![](/images/greek-palette-U2ND.webp)
+
+This palette offers linear colors, making it easy to create gradients, with meaningful tonal shifts that correspond well to population density. Darker tones can represent areas of higher population density, while lighter tones can signify less dense regions. Let’s see how we can bring this palette into RStudio.
+
+```r
+c1 <- met.brewer('Greek', direction = -1)
+swatchplot(c1)
+```
+
+The `direction` argument reverses the color order, ensuring the correct mapping between colors and population density. We then call `swatchplot()` to preview the palette we’ll use. You can use this function to experiment with other palettes available in the `MetBrewer` package.
+
+As I mentioned, the “Greek” palette is well-suited for creating gradients. Fortunately, R provides a function for that! We’ll use the `grDevices::colorRampPalette` function:
+
+```r
+texture <- grDevices::colorRampPalette(c1, bias = 1)(256)
+swatchplot(texture)
+```
+
+In this code:
+
+- The first argument, `c1`, is the color palette we created with the `MetBrewer` package, which is a list of hexadecimal color values.
+- The `bias` argument, a positive number, defines the spacing between colors at the high end of the palette.
+- The `colorRampPalette` returns a function, which takes an integer argument, the required number of colors to generate. Here we give 256.
+
+Now that we have our colors ready, we can use them in our 3D render by passing the `texture` variable as an argument.
+
+Now it’s time for the 3D plot. However, before we put our computer through the high-cost processing required for rendering, we need to find the best camera angle, zoom level, background color, and other aspects for our final render. To do this, we’ll use the `plot_3d` function, which doesn’t cast light rays or form shadows within the plot. Instead, it provides us with an interactive window where we can rotate and move around the plot. This allows us to experiment with different angles and settings quickly and conveniently, without putting too much strain on the CPU.
+
+```r
+mat |>
+  height_shade(texture = texture) |>
+  plot_3d(heightmap = mat,
+          windowsize = 800,
+          zscale = 100 / 3,
+          solid = FALSE,
+          shadowdepth = 0,
+          theta = 0,
+          phi = 25,
+          zoom = 0.66,
+          background = "#FFE9B4")
+```
+
+Before we call `plot_3d`, we first use the `height_shade` function with the `texture` variable to calculate the color at each point on the surface using a direct elevation-to-color mapping. This step is crucial for determining how the final 3D plot will look.
+
+As for `plot_3d`, there are many arguments we can adjust, but two stand out as particularly important. The first is the `heightmap` argument, which should be set to the matrix we created based on our population density data. The second is the `zscale` argument, which defines the scale of the z-axis for each point in the matrix. It’s important not to set this value too high, as it can create exaggerated peaks that distort the map's appearance.
+
+Another key argument is `shadowdepth`. By setting this to "0", we can achieve a better ground connection for our 3D plot, which I believe is essential for enhancing the overall aesthetic of the visualization.
+
+Once we find the most aesthetically pleasing angles and rotations for our camera, we can call the `render_camera` function to lock in these settings for our final render.
+
+```r
+render_camera(theta = -2, phi = 25, zoom = .63)
+```
+
+The values you choose here are entirely a matter of personal preference. They may vary based on your perspective or even the country your dataset represents, as the map being plotted will change accordingly.
+
+After finalizing our camera rotation and zoom, it’s time to bring out the big guns in our code to complete the final output.
+
+The star of the show here is the `render_highquality` function from the `rayshader` package. It accepts several arguments, including:
+
+- `filename`: The output image's filename. You can specify a path here to generate results in a specific folder within your project.
+- `interactive`: A boolean flag that determines whether the render will appear in an interactive window.
+- `lightdirection`: The angle of the light source. You can specify a vector with multiple values to create multiple light sources.
+- `lightaltitude`: The angle above the horizon where the light is positioned. This also supports multiple values for multiple light sources.
+- `lightcolor`: The color of the light sources, which can be used to complement your color palette.
+- `lightintensity`: The strength of the light sources.
+- `samples`: The maximum number of samples per pixel. The more samples you have, the higher the quality of your render.
+
+> [!warning]
+>
+> An additional argument, `sample_method`, is important if you need more than 256 samples. While not included in the code snippet below, it’s worth mentioning that you must set this to `"sobol"` if you exceed 256 samples. You can read more about it [in render_highquality documentation](https://www.rayshader.com/reference/render_highquality.html#arguments-1).
+
+Now, let’s see how this all comes together in code.
+
+```r
+# Create a variable for the filename and path.
+outfile <- "images/final_plot.png"
+
+{
+  # Assign start time to a variable.
+  start_time <- Sys.time()
+  cat(crayon::cyan(start_time), "\n")
+
+  # Create the PNG if it doesn't already exist.
+  if (!file.exists(outfile)) {
+    png::writePNG(matrix(1), target = outfile)
+  }
+
+  # Start rendering in high quality.
+  render_highquality(
+    filename = outfile,
+    interactive = FALSE,
+    lightdirection = 280,
+    lightaltitude = c(20, 80),
+    lightcolor = c(c1[2], "white"),
+    lightintensity = c(600, 100),
+    samples = 450,
+    width = 6000,
+    height = 6000
+  )
+
+  # Assign render end time to a variable.
+  end_time <- Sys.time()
+
+  # Calculate the elapsed time for render.
+  diff <- end_time - start_time
+
+  # Print the elapsed time for render.
+  cat(crayon::cyan(diff), "\n")
+}
+```
+
+As you can see, we’re also measuring how long the render takes, which is important because it can be quite time-consuming, especially if you’ve specified a large number of samples!
+
+Once the operation is complete, you should find your output image in your project’s directory, saved under the filename you specified. This final render will be much more beautiful and aesthetically pleasing compared to the `plot_3d` output, especially if you opted for a higher number of samples.
+
+To add some final touches to this stunning piece, we can use additional packages to insert text without compromising the image quality. Of course, if you have access to professional software that can maintain image quality, feel free to use it. But if you prefer to stay within the programming environment, keep reading!
+
+We’ll be using the following packages: `magick`, `MetBrewer`, `colorspace`, `ggplot2`, `glue`, and `stringr`. You can create a separate R file in your project to handle the markup of the render. For the sake of brevity, I’ll include the entire markup code below.
+
+```r
+library(magick)
+library(MetBrewer)
+library(colorspace)
+library(ggplot2)
+library(glue)
+library(stringr)
+
+img <- image_read("images/final_plot.png")
+
+colors <- met.brewer("Greek")
+swatchplot(colors)
+
+text_color <- darken(colors[2], .25)
+swatchplot(text_color)
+
+annot <- glue("Population estimates are bucketed into 400 meter ",
+              "hexagons.") |>
+  str_wrap(45)
+
+img |>
+  image_crop(gravity = "center",
+             geometry = "6000x3500+0-150") |>
+  image_annotate("Poland Population Density",
+                 gravity = "northwest",
+                 location = "+200+100",
+                 color = text_color,
+                 size = 200,
+                 weight = 700) |>
+  image_annotate(annot,
+                 gravity = "northeast",
+                 location = "+200+100",
+                 color = text_color,
+                 size = 75) |>
+  image_annotate(glue("Graphic by Atakan Zengin (atakanzen.com) | ",
+                      "Data: Kontur Population (Released 01/11/2023)"),
+                 gravity = "south",
+                 location = "+0+100",
+                 color = alpha(text_color, .5),
+                 size = 70) |>
+  image_write("images/titled_final_plot.png")
+```
+
+Of course, feel free to customize the colors, fonts, and annotations to suit your preferences and the specifics of your dataset.
+
+And finally, after all the hard work we've put in, we have this beauty in our hands:
+
+![](/images/titled-final-plot-EwNj.webp)
+
+I hope you enjoyed the content and appreciated the render as much as I do. There's something truly captivating about bringing data to life through 3D CGI, and it's a passion of mine that I love to share. Creating something visually striking while diving deep into the data is always rewarding. Thank you for following along on this journey, and I hope this guide inspires you to explore the world of 3D visualization and create your own stunning pieces. Have a great one, and happy coding!
+
+> [!tip]
+>
+> The full code is available in [this repository](https://github.com/atakanzen/population-visualization).

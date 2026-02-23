@@ -1,0 +1,96 @@
+---
+import { ClientRouter, fade } from "astro:transitions";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Software engineer, generalist, builder." } =
+  Astro.props;
+const pathname = Astro.url.pathname;
+
+const navLinks = [
+  { href: "/", label: "home" },
+  { href: "/writing", label: "writing" },
+  { href: "/photography", label: "photography" },
+];
+
+function isActive(href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href);
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={Astro.url.href} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jersey+20&family=JetBrains+Mono:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@atakanzen_" />
+
+    <style is:global>
+      @import "../styles/global.css";
+    </style>
+
+    <ClientRouter />
+  </head>
+  <body class="min-h-screen antialiased">
+    <nav
+      transition:animate="none"
+      class="fixed top-0 left-0 right-0 z-50 border-b border-(--border) bg-(--bg)/80 backdrop-blur-xl"
+    >
+      <div
+        class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between"
+      >
+        <a
+          href="/"
+          class="font-display text-2xl tracking-tight hover:text-(--accent) transition-colors duration-300"
+        >
+          az
+        </a>
+        <div
+          class="flex items-center gap-6 sm:gap-7 text-xs sm:text-sm font-mono"
+        >
+          {
+            navLinks.map((link) => (
+              <a
+                href={link.href}
+                class:list={[
+                  "nav-link transition-colors duration-300",
+                  isActive(link.href)
+                    ? "text-(--text)"
+                    : "text-(--text-secondary) hover:text-(--text)",
+                ]}
+              >
+                {isActive(link.href) && (
+                  <span class="text-(--accent) mr-1">*</span>
+                )}
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </nav>
+
+    <main class="pt-14" transition:animate={fade({ duration: "0.25s" })}>
+      <slot />
+    </main>
+  </body>
+</html>

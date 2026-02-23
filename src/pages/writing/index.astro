@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((p) => p.data.status === 'published')
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+---
+
+<BaseLayout title="Writing — Atakan Zengin" description="Thoughts on software engineering, technology, and building things.">
+  <div class="max-w-3xl mx-auto px-6 py-16 md:py-20">
+    <h1 class="stagger-item font-display text-5xl md:text-6xl mb-14" style="animation-delay: 0.05s">
+      Writing
+    </h1>
+
+    <div>
+      {posts.map((post, i) => (
+        <a
+          href={`/writing/${post.data.slug}`}
+          class="stagger-item group block py-7 border-b border-(--border) first:border-t transition-colors duration-300 text-(--text) visited:text-(--text)"
+          style={`animation-delay: ${0.1 + i * 0.08}s`}
+        >
+          <div class="flex flex-col md:flex-row md:items-baseline gap-1.5 md:gap-8">
+            <time class="text-xs text-(--text-secondary) shrink-0 tabular-nums tracking-wide font-mono">
+              {post.data.publishedAt.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </time>
+            <div class="flex-1 min-w-0">
+              <h2 class="font-display text-xl md:text-2xl group-hover:text-(--accent) transition-colors duration-300 leading-snug">
+                {post.data.title}
+              </h2>
+              <p class="text-sm text-(--text-secondary) mt-2 line-clamp-2 leading-relaxed">
+                {post.data.excerpt}
+              </p>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

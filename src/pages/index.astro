@@ -1,0 +1,76 @@
+---
+import GlitchText from "../components/GlitchText.tsx";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Atakan Zengin — Software Engineer">
+  <div
+    class="h-[calc(100dvh-3.5rem)] flex flex-col items-center justify-center px-6 relative overflow-hidden"
+  >
+    <!-- Dot grid background -->
+    <div
+      class="absolute inset-0 pointer-events-none opacity-[0.4]"
+      aria-hidden="true"
+      style="background-image: radial-gradient(circle, rgba(0,114,229,0.08) 1px, transparent 1px); background-size: 40px 40px;"
+    >
+    </div>
+
+    <!-- Ambient glow -->
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-160 h-160 rounded-full bg-[radial-gradient(circle,rgba(0,114,229,0.04)_0%,transparent_70%)]"
+      >
+      </div>
+    </div>
+
+    <div class="relative z-10 flex flex-col items-center text-center">
+      <div class="stagger-item" style="animation-delay: 0.1s">
+        <GlitchText client:load />
+      </div>
+
+      <h1
+        class="stagger-item text-5xl md:text-7xl mt-3 tracking-tight"
+        style="animation-delay: 0.2s"
+      >
+        Atakan Zengin
+      </h1>
+
+      <p
+        class="stagger-item text-sm text-(--text-secondary) mt-4 tracking-wide"
+        style="animation-delay: 0.3s"
+      >
+        software engineer
+      </p>
+
+      <div
+        class="stagger-item w-10 h-px bg-(--border) mt-8"
+        style="animation-delay: 0.4s"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div
+        class="stagger-item flex gap-6 mt-8 text-sm"
+        style="animation-delay: 0.5s"
+      >
+        <a
+          href="https://github.com/atakanzen"
+          target="_blank"
+          rel="noreferrer"
+          class="text-(--text-secondary) hover:text-(--accent) transition-colors duration-300"
+        >
+          github
+        </a>
+        <span class="text-(--border)">/</span>
+        <a
+          href="https://linkedin.com/in/atakanzen"
+          target="_blank"
+          rel="noreferrer"
+          class="text-(--text-secondary) hover:text-(--accent) transition-colors duration-300"
+        >
+          linkedin
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

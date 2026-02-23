@@ -1,0 +1,96 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  publishedAt: Date;
+}
+
+const { title, publishedAt } = Astro.props;
+---
+
+<BaseLayout title={`${title} — Atakan Zengin`}>
+  <div
+    id="scroll-progress"
+    class="fixed top-14 left-0 h-0.5 bg-(--accent) z-50 origin-left"
+    style="transform: scaleX(0); will-change: transform;"
+  />
+
+  <article class="max-w-3xl mx-auto px-6 py-16 md:py-20 page-appear">
+    <header class="mb-12">
+      <a
+        href="/writing"
+        class="text-xs text-(--text-secondary) hover:text-(--accent) transition-colors duration-300 inline-flex items-center gap-1.5 mb-8"
+      >
+        <span>&larr;</span> back to writing
+      </a>
+      <h1 class="font-display text-4xl md:text-5xl leading-tight">{title}</h1>
+      <time class="text-xs text-(--text-secondary) mt-4 block tabular-nums tracking-wide font-mono">
+        {publishedAt.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </time>
+    </header>
+
+    <div
+      class:list={[
+        'prose md:prose-lg max-w-none',
+        'prose-headings:font-display prose-headings:font-normal prose-headings:tracking-tight',
+        'prose-img:max-w-full prose-img:h-auto',
+        'prose-p:leading-relaxed prose-p:text-(--text)',
+        'prose-a:text-(--accent) prose-a:underline prose-a:decoration-(--accent)/30 prose-a:underline-offset-2 hover:prose-a:decoration-(--accent)',
+        'prose-code:text-(--accent) prose-code:bg-(--bg-surface) prose-code:border prose-code:border-(--border) prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none',
+        'prose-pre:border prose-pre:border-(--border) prose-pre:rounded-lg',
+        'prose-blockquote:border-l-(--accent) prose-blockquote:text-(--text-secondary) prose-blockquote:not-italic',
+        'prose-img:rounded-lg',
+        'prose-strong:text-(--text) prose-strong:font-semibold',
+        'prose-hr:border-(--border)',
+        'prose-li:text-(--text)',
+      ]}
+    >
+      <slot />
+    </div>
+  </article>
+
+  <script>
+    const progress = document.getElementById('scroll-progress');
+    if (progress) {
+      let ticking = false;
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (!ticking) {
+            requestAnimationFrame(() => {
+              const scrollTop = window.scrollY;
+              const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+              const ratio = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+              progress.style.transform = `scaleX(${ratio})`;
+              ticking = false;
+            });
+            ticking = true;
+          }
+        },
+        { passive: true }
+      );
+    }
+  </script>
+
+  <style is:global>
+    .prose pre {
+      scrollbar-width: none;
+    }
+    .prose pre::-webkit-scrollbar {
+      display: none;
+    }
+    .prose pre code {
+      color: inherit !important;
+      background-color: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      font-size: inherit !important;
+    }
+  </style>
+</BaseLayout>

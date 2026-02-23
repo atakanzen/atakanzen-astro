@@ -1,0 +1,72 @@
+---
+title: "About Low-Code Platforms: Why It Isn't Always The Best Option"
+publishedAt: "2023-05-29T22:00:00.000Z"
+status: "published"
+author:
+  name: "Atakan"
+  picture: "https://avatars.githubusercontent.com/u/59116264?v=4"
+slug: "about-low-code-platforms"
+excerpt: "My personal thoughts about low-code platforms."
+---
+
+> [!warning]
+>
+> Disclaimer: This post reflects my personal opinions and perspectives. You are not obligated to agree with me, but I will present my statements and viewpoints.
+
+## Background
+
+Up until a year ago, I was a software engineer who enjoyed writing code and unit tests to create quality software solutions. Now don’t get me wrong, I still am. However, instead of writing code, these days I find myself dragging and dropping boxes.
+
+Now if you're new to the low-code environment, you might imagine me switching careers to become a warehouse worker based on the previous paragraph. But fear not, I assure you I'm still a software engineer at heart! The truth is, I’ve been developing software solutions using a low-code platform called [Mendix](https://mendix.com/), which provides a set of pre-configured tools to create web applications really fast.
+
+Because, I’ve been working with it for more than a year now, I feel it’s time for me to write a blog post about my experiences and thoughts. In this post, I’ll be comparing the two approaches for software solutions by creating an analogy based on two different ways of traveling.
+
+## Low-Code: A public high-speed train
+
+The main purpose of a high-speed train is to get you from point A to point B in a short time thanks to its speed. That sounds good; it's really nice to arrive at your destination fast. However, this is only true if your sole purpose is to arrive there. Therefore, high-speed trains are nice until you want to add some more value to your trip or change something based on your preferences.
+
+The most obvious drawbacks of using high-speed trains are that they are not always punctual, you are obliged to buy food and water from an overpriced mobile minibar (as if minibars alone were not scary enough), and it's impossible to make detours based on your own will.
+
+Well, low-code development is almost identical to high-speed public trains. Both of their benefits and drawbacks are quite similar to each other. Let’s see how.
+
+### Benefits of Low-Code
+
+Creating functionalities with Mendix is incredibly fast. This is particularly true if your application is a simple create-read-update-delete application with additional cherry on top features.
+
+For your application's initial data model, you can create it in just 10 minutes with the basic requirements. The same speed applies to creating the logic of your application. It simply involves creating a flowchart that even my fellow CS graduates can recall from their Algorithms 101 classes.
+
+The entire platform is built around visualizations of your functionalities and data model, making it easy to onboard new developers to your project. The visual approach simplifies understanding and makes things more accessible.
+
+Once you have clear requirements from your Product Owner and Stakeholders, you're all set. In fact, you can encourage your Product Owners to create a business process flow that helps “write the code” for you.
+
+Moreover, Mendix also provides you with tools to create custom and complex functionalities, such as exposing a REST API, writing Java functions, and developing your own React components.
+
+However, since a software engineer can develop all of these functionalities outside of Mendix, I don't see any reason to depend on the platform in the first place when aiming to create a complex application.
+
+### Drawbacks of Low-Code
+
+First and foremost, the Git version control system provided by Mendix can be challenging when working in a large team. My main issue arises when I need to stash a work-in-progress change before pulling in new changes, as Mendix's Git wrapper does not support stashing. Consequently, to prevent losing all of your changes, you have to commit them anyway and then create a merge commit. I dislike having messy version control histories, and it's disappointing that Mendix lacks a developer friendly solution for this.
+
+Speaking of Git and big teams, using branching strategies other than sprint-branch strategies can be nearly impossible due to frequent conflicts that arise. Additionally, since Mendix lacks a stash concept, the primary method to resolve a merge conflict that is not resolvable by Mendix itself is to duplicate it and manually move the changes by hand.
+
+One of the top pain points is performance. Nowadays, there is a high demand for applications with information-heavy pages due to the data-driven nature of our age. Mendix provides you a set of tools to retrieve data from your database or from the memory, as well as tools for displaying this data. Everything seems like a fairy tale until this point, but it doesn't last long. If your application requires pages with densely populated information, you will receive couple of “bug” emails very soon because of your nested data-views.
+
+A data-view is simply a container that you can display attributes of a retrieved entity. So, if you need to create a page that will display information and actions available for multiple entities that are associated with each other, good luck.
+
+This is because [Mendix is not good with nested data-views](https://docs.mendix.com/refguide/performance-best-practices/#mxp011). While you went into this link, please do read other performance best practices and think how they can conflict with valuable business requirements.
+
+Mendix is a software platform, so it's possible that there may be workarounds to most of these problems if you delve deep enough. However, this raises the question once again: Should we truly rely on this platform and accept its limitations if we're going to seek workarounds anyway?
+
+Are we truly confident in dismissing stakeholders' requirements that would bring value to the business solely due to the limitations of a platform?
+
+## High-Code: Your own personal car
+
+Coming back to our high-speed train analogy, I personally prefer driving my own car for a trip. This way, I'm not bound to a single route and can explore wonderful paths based on my own preferences or the desires of my passengers.
+
+With high-code applications, the only limits are your imagination and that of your stakeholders. You have control over your functionalities, performance, and security. You're not reliant on external factors. Even if you're using a library or a framework, you have greater control over their configurations. If you feel restricted, you have the freedom to switch to another library — it's your decision.
+
+## Final
+
+Having worked with Mendix more than one year and created multiple applications now, I can say that careful consideration about your requirements is crucial when you have to make a decision about going with low-code. I'd suggest to go with Mendix if your application is a simple CRUD system or involves a moderate-level workflow with a few approval levels. You can also trust to low-code for proof of concepts that will only include MVP-level functionalities. However, for more complex projects, it's important to set realistic expectations to avoid disappointment.
+
+**I don't know about you, but as a software engineer, my greatest motivation is to bring happiness to people's lives by making things easier for them based on their requirements and problems. If anything hinders me from achieving this, it's a loss for both parties involved.**
