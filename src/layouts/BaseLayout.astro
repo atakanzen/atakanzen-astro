@@ -26,7 +26,7 @@ function isActive(href: string): boolean {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -44,7 +44,6 @@ function isActive(href: string): boolean {
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:creator" content="@atakanzen_" />
 
     <style is:global>
       @import "../styles/global.css";
@@ -64,7 +63,7 @@ function isActive(href: string): boolean {
           href="/"
           class="font-display text-2xl tracking-tight hover:text-(--accent) transition-colors duration-300"
         >
-          az
+          ati
         </a>
         <div
           class="flex items-center gap-6 sm:gap-7 text-xs sm:text-sm font-mono"

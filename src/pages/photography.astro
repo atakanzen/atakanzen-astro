@@ -1,54 +1,64 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "@layouts/BaseLayout.astro";
 
 const photographs = [
-  { src: '/photographs/padar-island.webp', alt: 'Padar Island' },
-  { src: '/photographs/gili-air.webp', alt: 'Gili Air' },
-  { src: '/photographs/deers-in-padar.webp', alt: 'Deers in Padar' },
-  { src: '/photographs/moon.webp', alt: 'Moon' },
-  { src: '/photographs/samet-nangshe.webp', alt: 'Samet Nangshe' },
-  { src: '/photographs/paper-lantern.webp', alt: 'Paper Lantern' },
-  { src: '/photographs/rider-on-sea.webp', alt: 'Rider on Sea' },
+  { src: "/photographs/padar-island.webp", alt: "Padar Island" },
+  { src: "/photographs/gili-air.webp", alt: "Gili Air" },
+  { src: "/photographs/deers-in-padar.webp", alt: "Deers in Padar" },
+  { src: "/photographs/moon.webp", alt: "Moon" },
+  { src: "/photographs/samet-nangshe.webp", alt: "Samet Nangshe" },
+  { src: "/photographs/paper-lantern.webp", alt: "Paper Lantern" },
+  { src: "/photographs/rider-on-sea.webp", alt: "Rider on Sea" },
 ];
 ---
 
-<BaseLayout title="Photography — Atakan Zengin" description="A collection of photographs from travels and everyday moments.">
+<BaseLayout
+  title="Photography — Atakan Zengin"
+  description="A collection of photographs from travels and everyday moments."
+>
   <div class="max-w-6xl mx-auto px-6 py-16 md:py-20">
-    <h1 class="stagger-item font-display text-5xl md:text-6xl mb-14" style="animation-delay: 0.05s">
+    <h1
+      class="stagger-item font-display text-5xl md:text-6xl mb-14"
+      style="animation-delay: 0.05s"
+    >
       Photography
     </h1>
 
     <div class="columns-1 md:columns-2 gap-5">
-      {photographs.map((photo, i) => (
-        <div class="photo-item mb-5 break-inside-avoid">
-          <img
-            src={photo.src}
-            alt={photo.alt}
-            loading={i < 4 ? "eager" : "lazy"}
-            decoding={i < 4 ? "sync" : "async"}
-            fetchpriority={i < 2 ? "high" : undefined}
-            class="w-full rounded-sm hover:rounded-lg transition-all duration-500 hover:shadow-[0_0_40px_rgba(0,114,229,0.08)]"
-          />
-        </div>
-      ))}
+      {
+        photographs.map((photo, i) => (
+          <div class="photo-item mb-5 break-inside-avoid">
+            <img
+              src={photo.src}
+              alt={photo.alt}
+              loading={i < 4 ? "eager" : "lazy"}
+              decoding={i < 4 ? "sync" : "async"}
+              fetchpriority={i < 2 ? "high" : undefined}
+              class="w-full rounded-sm hover:rounded-lg transition-all duration-500 hover:shadow-[0_0_40px_rgba(0,114,229,0.08)]"
+            />
+          </div>
+        ))
+      }
     </div>
   </div>
 
   <script>
-    document.addEventListener('astro:page-load', () => {
+    document.addEventListener("astro:page-load", () => {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('revealed');
+              entry.target.classList.add("revealed");
               observer.unobserve(entry.target);
             }
           });
         },
-        { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
       );
 
-      document.querySelectorAll('.photo-item').forEach((el) => observer.observe(el));
+      document
+        .querySelectorAll(".photo-item")
+        .forEach((el) => observer.observe(el));
     });
   </script>
 </BaseLayout>
