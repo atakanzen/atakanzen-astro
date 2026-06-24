@@ -1,5 +1,6 @@
 ---
 import { ClientRouter, fade } from "astro:transitions";
+import { Font } from "astro:assets";
 
 interface Props {
   title: string;
@@ -33,12 +34,9 @@ function isActive(href: string): boolean {
     <link rel="apple-touch-icon" href="/favicon-512.png" />
     <link rel="canonical" href={Astro.url.href} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Jersey+20&family=JetBrains+Mono:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <Font cssVariable="--font-jersey" preload />
+    <Font cssVariable="--font-nudica" preload />
+    <Font cssVariable="--font-jetbrains" />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

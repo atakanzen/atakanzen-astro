@@ -2,17 +2,12 @@
 @import "rehype-callouts/theme/github";
 @plugin "@tailwindcss/typography";
 
-@font-face {
-  font-family: "Nudica";
-  src: url("/fonts/nudica-medium-webfont.ttf") format("truetype");
-  font-weight: 500;
-  font-display: swap;
-}
-
 @theme {
-  --font-display: "Jersey 20", sans-serif;
-  --font-sans: "Nudica", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* Resolve to the CSS variables emitted by Astro's <Font> components
+     (see astro.config.mjs experimental.fonts + BaseLayout head). */
+  --font-display: var(--font-jersey);
+  --font-sans: var(--font-nudica);
+  --font-mono: var(--font-jetbrains);
 }
 
 :root {

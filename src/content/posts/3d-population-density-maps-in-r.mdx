@@ -9,7 +9,16 @@ slug: "3d-population-density-maps-in-r"
 excerpt: "How to use RStudio to create aesthetic 3D renders for population density maps."
 ---
 
-![](/images/final-plot-QyNj.webp)
+import { Image } from "astro:assets";
+import finalPlot from "../../assets/images/final-plot.webp";
+
+<Image
+  src={finalPlot}
+  alt="Final 3D-rendered population density map"
+  loading="eager"
+  fetchpriority="high"
+  sizes="(min-width: 768px) 768px, 100vw"
+/>
 
 ## Introduction
 
@@ -53,7 +62,7 @@ In this code, the `poland |> ggplot()` statement initializes a `ggplot` object w
 
 Essentially, it plots the geometries stored in the `poland` object by drawing the boundaries of regions, points, or other geospatial features present in the data. These function calls will yield a plot that looks like this:
 
-![](/images/r-plot-Q1MD.webp)
+![Initial 2D population density plot in R](../../assets/images/r-plot.webp)
 
 As you can see, the latitude and longitude are also handled and displayed on the axes. However, we’re still far from the first image I showed you at the beginning of this article. How do we make this plot 3D, reactive to light rays, and capable of forming shadows? Let’s explore that in the next section.
 
@@ -103,7 +112,7 @@ In my opinion, shadows and light are the most important elements in aesthetics. 
 
 First, we need colors that will complement our work with light and shadow. For this, we’ll use the `MetBrewer` package, which provides color palettes inspired by works from the [Metropolitan Museum of Art in New York City](https://www.metmuseum.org/). For this plot, I’ve chosen the “Greek” palette.
 
-![](/images/greek-palette-U2ND.webp)
+![Greek color palette used for the render](../../assets/images/greek-palette.webp)
 
 This palette offers linear colors, making it easy to create gradients, with meaningful tonal shifts that correspond well to population density. Darker tones can represent areas of higher population density, while lighter tones can signify less dense regions. Let’s see how we can bring this palette into RStudio.
 
@@ -270,7 +279,7 @@ Of course, feel free to customize the colors, fonts, and annotations to suit you
 
 And finally, after all the hard work we've put in, we have this beauty in our hands:
 
-![](/images/titled-final-plot-EwNj.webp)
+![Titled final 3D population density render](../../assets/images/titled-final-plot.webp)
 
 I hope you enjoyed the content and appreciated the render as much as I do. There's something truly captivating about bringing data to life through 3D CGI, and it's a passion of mine that I love to share. Creating something visually striking while diving deep into the data is always rewarding. Thank you for following along on this journey, and I hope this guide inspires you to explore the world of 3D visualization and create your own stunning pieces. Have a great one, and happy coding!
 

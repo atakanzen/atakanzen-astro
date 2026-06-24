@@ -1,15 +1,28 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+const files = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/photographs/*.webp",
+  { eager: true },
+);
 
 const photographs = [
-  { src: "/photographs/padar-island.webp", alt: "Padar Island" },
-  { src: "/photographs/gili-air.webp", alt: "Gili Air" },
-  { src: "/photographs/deers-in-padar.webp", alt: "Deers in Padar" },
-  { src: "/photographs/moon.webp", alt: "Moon" },
-  { src: "/photographs/samet-nangshe.webp", alt: "Samet Nangshe" },
-  { src: "/photographs/paper-lantern.webp", alt: "Paper Lantern" },
-  { src: "/photographs/rider-on-sea.webp", alt: "Rider on Sea" },
-];
+  { file: "padar-island", alt: "Padar Island" },
+  { file: "gili-air", alt: "Gili Air" },
+  { file: "deers-in-padar", alt: "Deers in Padar" },
+  { file: "moon", alt: "Moon" },
+  { file: "samet-nangshe", alt: "Samet Nangshe" },
+  { file: "paper-lantern", alt: "Paper Lantern" },
+  { file: "rider-on-sea", alt: "Rider on Sea" },
+].map((p) => ({
+  ...p,
+  src: files[`../assets/photographs/${p.file}.webp`].default,
+}));
+
+// Images render at full viewport width on mobile, ~one masonry column (~542px) on desktop.
+const sizes = "(min-width: 768px) 542px, 100vw";
 ---
 
 <BaseLayout
@@ -28,11 +41,11 @@ const photographs = [
       {
         photographs.map((photo, i) => (
           <div class="photo-item mb-5 break-inside-avoid">
-            <img
+            <Image
               src={photo.src}
               alt={photo.alt}
+              sizes={sizes}
               loading={i < 4 ? "eager" : "lazy"}
-              decoding={i < 4 ? "sync" : "async"}
               fetchpriority={i < 2 ? "high" : undefined}
               class="w-full rounded-sm hover:rounded-lg transition-all duration-500 hover:shadow-[0_0_40px_rgba(0,114,229,0.08)]"
             />
